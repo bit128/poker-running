@@ -1,0 +1,4 @@
+.DS_Store
+.cocos-project.json
+frameworks/cocos2d-x/
+frameworks/runtime-src/
