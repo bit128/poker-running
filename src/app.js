@@ -54,7 +54,7 @@ var PokerLayer = cc.Layer.extend({
     senderInterval:     null,
     sendStartIndex:     0,
     putStartIndex:      -1,
-    putEnd:            -1,
+    putEnd:             -1,
     ctor: function(){
         this._super();
         this.pokerOrder = new PokerOrder();
