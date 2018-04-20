@@ -78,7 +78,12 @@ var PokerOrder = cc.Class.extend({
             for (var k in cardCount) {
                 keys.push(parseInt(k));
             }
-            keys.sort();
+            keys.sort(function(a, b){
+                if (a>b)
+                    return 1;
+                else 
+                    return -1;
+            });
             var c = keys.length;
             var count = [];
             for (var key in cardCount) {
@@ -88,8 +93,9 @@ var PokerOrder = cc.Class.extend({
             if (/^[1,]{9,}$/.test(count)) {
                 //单顺子 34567 - 456789
                 for (var i=1; i<c; i++) {
-                    if (parseInt(keys[i-1])+1 != parseInt(keys[i]))
+                    if (parseInt(keys[i-1])+1 != parseInt(keys[i])) {
                         return false;
+                    }
                 }
                 return ["11,"+c, keys[c-1]];
             } else if (/^[2,]{5,}$/.test(count)) {
@@ -170,38 +176,6 @@ var PokerOrder = cc.Class.extend({
                         }
                     }
                 }
-                /*
-                var l = parseInt(underCard[0]); //张数
-                var d = parseInt(underCard[1]); //点数
-                var s = 0; //记录点数
-                var c = 0; //到达张数
-                var p = 0; //抽离张数
-                for (var i of digits) {
-                    if (s > 0) {
-                        if (i == s) {
-                            c++;
-                        } else if (i > s) {
-                            s = i;
-                            c == 1;
-                        }
-                    } else if (i > d) {
-                        s = i;
-                        c = 1;
-                    }
-                    if (c == l) {
-                        for (var k in pileCardWeight) {
-                            if (pileCardWeight[k] == s) {
-                                result.push(k);
-                                p++;
-                            }
-                        }
-                        cc.log(result, c, l , p, pileCardWeight);
-                        break;
-                    }
-                }
-                if(c < parseInt(underCard[0])) {
-                    result = [];
-                }*/
             }
         }
         return result;

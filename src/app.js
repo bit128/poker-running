@@ -53,9 +53,9 @@ var PokerLayer = cc.Layer.extend({
     mpScoreNode:        null,
     rpScoreNode:        null,
     lpScoreNode:        null,
-    mpScore:            2000,
-    rpScore:            2000,
-    lpScore:            2000,
+    mpScore:            1000,
+    rpScore:            1000,
+    lpScore:            1000,
     rpNumNode:          0,
     rpNumNode:          0,
     senderNode:         null,
@@ -214,13 +214,20 @@ var PokerLayer = cc.Layer.extend({
         var stack = this.pokerOrder.countDigit(cardList);
         if (stack) {
             if (this.underCard != null) {
-                if (this.underCard[0] != stack[0]) {
-                    cc.log('Error: 点数类型不一致');
-                    return false;
-                }
-                if (this.underCard[1] >= stack[1]) {
-                    cc.log('Error: 点数太小');
-                    return false;
+                if (stack[0] == '4') {
+                    if (this.underCard[0] == 4 && this.underCard[1] >= stack[1]) {
+                        cc.log('炸弹太小');
+                        return false;
+                    }
+                } else {
+                    if (this.underCard[0] != stack[0]) {
+                        cc.log('点数类型不一致');
+                        return false;
+                    }
+                    if (this.underCard[1] >= stack[1]) {
+                        cc.log('点数太小');
+                        return false;
+                    }
                 }
             }
             //出牌动作
@@ -607,7 +614,7 @@ var PokerLayer = cc.Layer.extend({
         node.setColor(cc.color(220, 60, 10));
         node.attr({
             x: cc.winSize.width / 2,
-            y: cc.winSize.height / 2 + 100
+            y: cc.winSize.height / 2 + 300
         });
         this.putStartIndex = player;
         //新游戏
@@ -648,5 +655,9 @@ var MainScene = cc.Scene.extend({
         this.addChild(this.pokerLayer);
         //开始游戏
         this.pokerLayer.newGame();
+        /*
+        var pokerOrder = new PokerOrder();
+        var cardList = ["a3","a3","a3","a3"];
+        cc.log(pokerOrder.countDigit(cardList));*/
     }
 });
