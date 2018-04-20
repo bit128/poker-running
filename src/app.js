@@ -50,11 +50,19 @@ var PokerLayer = cc.Layer.extend({
     mpNode:             null,
     rpNode:             null,
     lpNode:             null,
+    mpScoreNode:        null,
+    rpScoreNode:        null,
+    lpScoreNode:        null,
+    mpScore:            2000,
+    rpScore:            2000,
+    lpScore:            2000,
+    rpNumNode:          0,
+    rpNumNode:          0,
     senderNode:         null,
     senderInterval:     null,
     sendStartIndex:     0,
     putStartIndex:      -1,
-    putEnd:            -1,
+    putEnd:             -1,
     ctor: function(){
         this._super();
         this.pokerOrder = new PokerOrder();
@@ -79,6 +87,44 @@ var PokerLayer = cc.Layer.extend({
             x: cc.winSize.width/2+300,
             y: cc.winSize.height/2+100
         });
+        //加载玩家分数节点
+        this.mpScoreNode = new cc.LabelTTF("我的分数:"+this.mpScore, "Arial", 42);
+        this.mpScoreNode.attr({
+            x: cc.winSize.width/2,
+            y: cc.winSize.height/2+500,
+            color: cc.color(220, 120, 70)
+        });
+        this.addChild(this.mpScoreNode);
+        //加载机器玩家一分数、卡牌数节点
+        this.rpScoreNode = new cc.LabelTTF("分数:"+this.rpScore, "Arial", 28);
+        this.rpScoreNode.attr({
+            x: cc.winSize.width/2+280,
+            y: cc.winSize.height/2-30,
+            color: cc.color(220, 60, 10)
+        });
+        this.addChild(this.rpScoreNode);
+        this.rpNumNode = new cc.LabelTTF("0张", "Arial", 26);
+        this.rpNumNode.attr({
+            x: cc.winSize.width/2+290,
+            y: cc.winSize.height/2+10,
+            color: cc.color(220, 60, 10)
+        });
+        this.addChild(this.rpNumNode);
+        //加载机器玩家二分数、卡牌数节点
+        this.lpScoreNode = new cc.LabelTTF("分数:"+this.lpScore, "Arial", 28);
+        this.lpScoreNode.attr({
+            x: cc.winSize.width/2-280,
+            y: cc.winSize.height/2-30,
+            color: cc.color(220, 60, 10)
+        });
+        this.addChild(this.lpScoreNode);
+        this.lpNumNode = new cc.LabelTTF("0张", "Arial", 26);
+        this.lpNumNode.attr({
+            x: cc.winSize.width/2-290,
+            y: cc.winSize.height/2+10,
+            color: cc.color(220, 60, 10)
+        });
+        this.addChild(this.lpNumNode);
         //加载操作按钮
         //出牌
         this.sendBtn = new ccui.Button("res/send-normal.png","res/send-pressed.png","");
@@ -147,6 +193,8 @@ var PokerLayer = cc.Layer.extend({
         this.mpNode.removeAllChildren();
         this.rpNode.removeAllChildren();
         this.lpNode.removeAllChildren();
+        this.rpNumNode.setString("0张");
+        this.lpNumNode.setString("0张");
         //发牌逻辑
         this.sendPoker();
     },
@@ -216,7 +264,7 @@ var PokerLayer = cc.Layer.extend({
         if (this.putStartIndex > 0) {
             var that = this;
             var interval = setInterval(function(){
-                var hp,cardNode;
+                var hp,cardNode,numNode;
                 var position = 0;
                 if (that.putEnd == that.putStartIndex) {
                     that.putEnd = -1;
@@ -225,6 +273,7 @@ var PokerLayer = cc.Layer.extend({
                 if (that.putStartIndex == 1) {
                     hp = that.rp;
                     cardNode = that.rpNode;
+                    numNode = that.rpNumNode;
                     position = 100;
                     //转到下一机器玩家
                     cc.log('-->机器玩家: ',that.putStartIndex,' 出牌');
@@ -232,6 +281,7 @@ var PokerLayer = cc.Layer.extend({
                 } else if (that.putStartIndex == 2) {
                     hp = that.lp;
                     cardNode = that.lpNode;
+                    numNode = that.lpNumNode;
                     position = -100;
                     //转到主角玩家
                     cc.log('-->机器玩家: ',that.putStartIndex,' 出牌');
@@ -267,6 +317,7 @@ var PokerLayer = cc.Layer.extend({
                     for (var i=0; i<cards.length; i++) {
                         cardNode.children[cardNode.children.length-1].removeFromParent();
                     }
+                    numNode.setString(hp.length+"张");
                     cc.log('----> put card: ', stack);
                     //判断是否出完卡牌
                     if (hp.length == 0) {
@@ -299,7 +350,7 @@ var PokerLayer = cc.Layer.extend({
                     cc.audioEngine.playEffect("res/Unlock.mp3");
                     cc.log('----> pass. ');
                 }
-            }, 2000);
+            }, 1000);
         }
     },
     /**
@@ -516,6 +567,8 @@ var PokerLayer = cc.Layer.extend({
             }, 500);
             
         }
+        this.rpNumNode.setString("16张");
+        this.lpNumNode.setString("16张");
         cc.log('--> 首次出牌玩家：', this.putStartIndex);
     },
     /**
@@ -528,14 +581,27 @@ var PokerLayer = cc.Layer.extend({
         switch(player) {
             case 0:
                 text = "您获得了胜利";
+                this.mpScore += (this.rp.length + this.lp.length) * 10;
+                this.rpScore -= this.rp.length * 10;
+                this.lpScore -= this.lp.length * 10;
                 break;
             case 1:
                 text = "机器玩家1获得了胜利";
+                this.rpScore += (this.lp.length + this.mp.length) * 10;
+                this.lpScore -= this.lp.length * 10;
+                this.mpScore -= this.mp.length * 10;
                 break;
             case 2:
                 text = "机器玩家2获得了胜利";
+                this.lpScore += (this.mp.length + this.rp.length) * 10;
+                this.mpScore -= this.mp.length * 10;
+                this.rpScore -= this.rp.length * 10;
                 break;
         }
+        this.mpScoreNode.setString("我的分数:"+this.mpScore);
+        this.rpScoreNode.setString("分数:"+this.rpScore);
+        this.lpScoreNode.setString("分数:"+this.lpScore);
+
         var node = new cc.LabelTTF(text, "Arial", 40);
         this.pileNode.addChild(node);
         node.setColor(cc.color(220, 60, 10));
@@ -543,7 +609,12 @@ var PokerLayer = cc.Layer.extend({
             x: cc.winSize.width / 2,
             y: cc.winSize.height / 2 + 100
         });
-        this.putStartIndex = -1;
+        this.putStartIndex = player;
+        //新游戏
+        var that = this;
+        setTimeout(function(){
+            that.newGame();
+        }, 3000);
     }
 });
 
